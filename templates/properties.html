@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Properties - HomeFind AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        .listings-page {
+            max-width: 1200px;
+            margin: 100px auto 60px;
+            padding: 0 24px;
+        }
+        .listings-page h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .listings-subtitle {
+            color: var(--text-muted);
+            margin-bottom: 32px;
+        }
+        .listings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+        }
+        .listing-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: box-shadow 0.3s, transform 0.3s;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+        .listing-card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-4px);
+        }
+        .listing-img {
+            height: 200px;
+            background-size: cover;
+            background-position: center;
+            background-color: #e2e8f0;
+        }
+        .listing-img-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+        }
+        .listing-body {
+            padding: 16px;
+        }
+        .listing-price {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        .listing-addr {
+            font-weight: 500;
+            margin-top: 4px;
+        }
+        .listing-loc {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        .listing-meta {
+            display: flex;
+            gap: 16px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-logo">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
+                HomeFind AI
+            </a>
+            <div class="nav-links">
+                <a href="/properties">All Properties</a>
+                <a href="/" class="nav-cta">Chat with AI</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="listings-page">
+        <h1>All Properties</h1>
+        <p class="listings-subtitle">{{ properties | length }} properties available</p>
+
+        <div class="listings-grid">
+            {% for p in properties %}
+            <a href="/property/{{ p.id | int }}" class="listing-card">
+                {% if p.image_url %}
+                <div class="listing-img" style="background-image: url('{{ p.image_url }}')"></div>
+                {% else %}
+                <div class="listing-img listing-img-placeholder">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                        <polyline points="9 22 9 12 15 12 15 22"/>
+                    </svg>
+                </div>
+                {% endif %}
+                <div class="listing-body">
+                    <div class="listing-price">${{ "{:,.0f}".format(p.price) }}</div>
+                    <div class="listing-addr">{{ p.address }}</div>
+                    <div class="listing-loc">{{ p.city }}, {{ p.state }} {{ p.zip }}</div>
+                    <div class="listing-meta">
+                        <span>{{ p.bedrooms | int }} bd</span>
+                        <span>{{ p.bathrooms | int }} ba</span>
+                        <span>{{ "{:,.0f}".format(p.sqft) }} sqft</span>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+
+</body>
+</html>

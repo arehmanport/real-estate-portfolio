@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ property.address }} - HomeFind AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        .property-detail {
+            max-width: 900px;
+            margin: 100px auto 60px;
+            padding: 0 24px;
+        }
+        .property-hero-img {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            border-radius: 16px;
+            background: #e2e8f0;
+        }
+        .property-hero-placeholder {
+            width: 100%;
+            height: 400px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+        }
+        .pd-header {
+            margin-top: 24px;
+        }
+        .pd-price {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+        .pd-address {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+        .pd-location {
+            color: var(--text-muted);
+            font-size: 1rem;
+            margin-top: 2px;
+        }
+        .pd-stats {
+            display: flex;
+            gap: 32px;
+            margin-top: 24px;
+            padding: 20px 0;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+        .pd-stat {
+            text-align: center;
+        }
+        .pd-stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        .pd-stat-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+        .pd-description {
+            margin-top: 24px;
+        }
+        .pd-description h2 {
+            text-align: left;
+            font-size: 1.3rem;
+            margin-bottom: 12px;
+        }
+        .pd-description p {
+            color: var(--text-muted);
+            line-height: 1.8;
+            font-size: 1rem;
+        }
+        .pd-actions {
+            margin-top: 32px;
+            display: flex;
+            gap: 12px;
+        }
+        .pd-btn {
+            padding: 12px 28px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            font-family: inherit;
+            border: none;
+            transition: transform 0.2s, background 0.2s;
+        }
+        .pd-btn:hover {
+            transform: translateY(-2px);
+        }
+        .pd-btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        .pd-btn-primary:hover {
+            background: var(--primary-dark);
+        }
+        .pd-btn-secondary {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+            transition: color 0.2s;
+        }
+        .back-link:hover {
+            color: var(--text);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-logo">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
+                HomeFind AI
+            </a>
+            <div class="nav-links">
+                <a href="/properties">All Properties</a>
+                <a href="/" class="nav-cta">Chat with AI</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="property-detail">
+        <a href="/properties" class="back-link">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15 18 9 12 15 6"/>
+            </svg>
+            Back to listings
+        </a>
+
+        {% if property.image_url %}
+        <img src="{{ property.image_url }}" alt="{{ property.address }}" class="property-hero-img">
+        {% else %}
+        <div class="property-hero-placeholder">
+            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+        </div>
+        {% endif %}
+
+        <div class="pd-header">
+            <div class="pd-price">${{ "{:,.0f}".format(property.price) }}</div>
+            <div class="pd-address">{{ property.address }}</div>
+            <div class="pd-location">{{ property.city }}, {{ property.state }} {{ property.zip }}</div>
+        </div>
+
+        <div class="pd-stats">
+            <div class="pd-stat">
+                <div class="pd-stat-value">{{ property.bedrooms | int }}</div>
+                <div class="pd-stat-label">Bedrooms</div>
+            </div>
+            <div class="pd-stat">
+                <div class="pd-stat-value">{{ property.bathrooms | int }}</div>
+                <div class="pd-stat-label">Bathrooms</div>
+            </div>
+            <div class="pd-stat">
+                <div class="pd-stat-value">{{ "{:,.0f}".format(property.sqft) }}</div>
+                <div class="pd-stat-label">Sq Ft</div>
+            </div>
+        </div>
+
+        <div class="pd-description">
+            <h2>About This Property</h2>
+            <p>{{ property.description or "No description available." }}</p>
+        </div>
+
+        <div class="pd-actions">
+            <a href="/" class="pd-btn pd-btn-primary" onclick="localStorage.setItem('openChat','1')">Ask AI About This Home</a>
+            <a href="/properties" class="pd-btn pd-btn-secondary">Browse More</a>
+        </div>
+    </div>
+
+</body>
+</html>
