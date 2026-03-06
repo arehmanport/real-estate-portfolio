@@ -37,6 +37,7 @@ def search_properties(
     min_sqft=None,
     city=None, state=None, zip_code=None,
     limit=20,
+    **_kwargs,
 ):
     """Search properties with optional filters. Returns top matches as list of dicts."""
     df = _load_data()

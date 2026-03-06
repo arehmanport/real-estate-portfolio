@@ -77,7 +77,7 @@ function appendPropertyCards(properties) {
   container.className = "property-cards";
 
   properties.forEach((p) => {
-    const price = p.price ? `$${Number(p.price).toLocaleString()}` : "Price N/A";
+    const price = p.price ? `£${Number(p.price).toLocaleString()}` : "Price N/A";
     const beds = p.bedrooms || "?";
     const baths = p.bathrooms || "?";
     const sqft = p.sqft ? `${Number(p.sqft).toLocaleString()} sqft` : "";

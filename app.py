@@ -31,40 +31,41 @@ MODELS = [
 SYSTEM_PROMPT = """You are the AI assistant for HomeFind AI, a full-service real estate company. You represent the company and help users with anything related to our services or property searches.
 
 === ABOUT HOMEFIND AI ===
-HomeFind AI is a technology-driven real estate company founded in 2021, headquartered in Austin, Texas. We operate across major Texas cities: Austin, Dallas, Houston, and San Antonio.
+HomeFind AI is a technology-driven estate agency founded in 2021, headquartered in London, England. We operate across major UK cities: London, Manchester, Birmingham, Edinburgh, Bristol, and Liverpool.
 
 **What We Do:**
 - **Property Search & Discovery**: AI-powered property matching based on your preferences, budget, and lifestyle needs.
-- **Buying Assistance**: End-to-end support from search to closing — we pair you with a licensed agent, handle negotiations, inspections, and paperwork.
-- **Selling Services**: Free home valuation, professional staging advice, photography, listing on MLS and 50+ platforms, and dedicated seller agent.
-- **Rental Services**: Help tenants find rentals and help landlords list and manage rental properties.
-- **Property Management**: For investors and landlords — tenant screening, rent collection, maintenance coordination, and monthly financial reports.
-- **Home Valuation & Market Analysis**: Free AI-powered home valuations and neighborhood market reports for any address in our service areas.
-- **Mortgage & Financing Guidance**: We connect buyers with our network of trusted mortgage lenders to find the best rates. We don't lend directly but guide you through the process.
-- **Relocation Assistance**: Moving to Texas? We provide city guides, school district info, neighborhood comparisons, and a dedicated relocation specialist.
-- **Investment Consulting**: Market trend analysis, ROI projections, and portfolio strategy for real estate investors.
+- **Buying Assistance**: End-to-end support from search to completion — we pair you with a qualified estate agent, handle negotiations, surveys, conveyancing, and paperwork.
+- **Selling Services**: Free home valuation, professional staging advice, photography, listing on Rightmove, Zoopla, OnTheMarket and 40+ platforms, and a dedicated selling agent.
+- **Lettings & Rental Services**: Help tenants find rentals and help landlords list and manage rental properties across the UK.
+- **Property Management**: For investors and landlords — tenant referencing, rent collection, maintenance coordination, and monthly financial reports.
+- **Home Valuation & Market Analysis**: Free AI-powered home valuations and neighbourhood market reports for any address in our service areas.
+- **Mortgage & Financing Guidance**: We connect buyers with our network of trusted mortgage brokers and lenders to find the best rates. We don't lend directly but guide you through the process.
+- **Relocation Assistance**: Moving to the UK? We provide city guides, school catchment info, neighbourhood comparisons, and a dedicated relocation specialist.
+- **Investment Consulting**: Market trend analysis, rental yield projections, and portfolio strategy for property investors.
 
 **How It Works:**
 1. Tell us what you need — chat with our AI assistant or call us.
-2. We match you with the right service and a licensed agent if needed.
+2. We match you with the right service and a qualified agent if needed.
 3. Our AI tools + human experts work together to deliver results fast.
-4. We guide you through every step until the deal is done.
+4. We guide you through every step until completion.
 
 **Key Facts:**
-- Licensed brokerage in the state of Texas
-- 50+ licensed agents across 4 cities
+- Registered with The Property Ombudsman (TPO) and member of ARLA Propertymark
+- 50+ qualified agents across 6 cities
 - Over 2,000 transactions completed since 2021
-- Average 15 days to close for buyers
+- Average 8 weeks from offer to completion for buyers
 - 98% client satisfaction rating
-- No upfront fees for buyers — we earn commission only when you close
-- Sellers: competitive 1.5% listing fee (vs. industry standard 2.5-3%)
+- No upfront fees for buyers — we earn commission only on completion
+- Sellers: competitive 0.75% + VAT selling fee (vs. industry standard 1-2% + VAT)
+- All prices in GBP (British Pounds)
 
 **Contact:**
-- Website: www.homefindai.com
-- Phone: (512) 555-HOME (4663)
-- Email: hello@homefindai.com
-- Hours: Mon-Sat 8AM-8PM CT, Sun 10AM-6PM CT
-- Office: 400 Congress Ave, Suite 200, Austin, TX 78701
+- Website: www.homefindai.co.uk
+- Phone: 020 7946 0958
+- Email: hello@homefindai.co.uk
+- Hours: Mon-Sat 8AM-8PM GMT, Sun 10AM-6PM GMT
+- Office: 10 King William Street, London, EC4N 7TW
 
 === PROPERTY SEARCH RULES ===
 When a user asks about properties, homes, or real estate listings:
@@ -167,27 +168,26 @@ def call_llm(user_message):
             response = call_groq(messages, MODELS[0], tools=TOOLS)
         except BadRequestError as e:
             if "tool_use_failed" in str(e):
-                args = parse_failed_tool_call(e)
-                if args:
-                    args.setdefault("limit", 20)
-                    properties = search_properties(**args)
-                    summary_msg = (
-                        f"[Tool returned {len(properties)} properties: "
-                        f"{json.dumps([{k: r.get(k) for k in ('address','city','state','price','bedrooms','bathrooms','sqft')} for r in properties])}]"
-                    )
-                    messages.append({"role": "assistant", "content": summary_msg})
-                    messages.append({"role": "user", "content":
-                        "Present the top 5 properties. If there are more, tell the user how many more are available."
-                    })
-                    response = call_groq(messages, MODELS[0])
-                    reply_text = response.choices[0].message.content or (
-                        "Here are some properties I found!" if properties else
-                        "Sorry, I couldn't find any properties matching your criteria. Try adjusting your budget or filters."
-                    )
-                    history.append({"role": "assistant", "content": f"{reply_text}\n\n[Search results: {summary_msg}]"})
-                    session["messages"] = history
-                    session.modified = True
-                    return reply_text, properties[:5]
+                args = parse_failed_tool_call(e) or {}
+                args.setdefault("limit", 20)
+                properties = search_properties(**args)
+                summary_msg = (
+                    f"[Tool returned {len(properties)} properties: "
+                    f"{json.dumps([{k: r.get(k) for k in ('address','city','state','price','bedrooms','bathrooms','sqft')} for r in properties])}]"
+                )
+                messages.append({"role": "assistant", "content": summary_msg})
+                messages.append({"role": "user", "content":
+                    "Present the top 5 properties. If there are more, tell the user how many more are available."
+                })
+                response = call_groq(messages, MODELS[0])
+                reply_text = response.choices[0].message.content or (
+                    "Here are some properties I found!" if properties else
+                    "Sorry, I couldn't find any properties matching your criteria. Try adjusting your budget or filters."
+                )
+                history.append({"role": "assistant", "content": f"{reply_text}\n\n[Search results: {summary_msg}]"})
+                session["messages"] = history
+                session.modified = True
+                return reply_text, properties[:5]
             raise
 
         resp_msg = response.choices[0].message

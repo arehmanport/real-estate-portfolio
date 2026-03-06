@@ -164,7 +164,7 @@
         {% endif %}
 
         <div class="pd-header">
-            <div class="pd-price">${{ "{:,.0f}".format(property.price) }}</div>
+            <div class="pd-price">£{{ "{:,.0f}".format(property.price) }}</div>
             <div class="pd-address">{{ property.address }}</div>
             <div class="pd-location">{{ property.city }}, {{ property.state }} {{ property.zip }}</div>
         </div>

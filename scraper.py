@@ -160,26 +160,28 @@ def generate_sample_data():
     import random
 
     streets = [
-        "Oak Hill Dr", "Maple Ave", "Cedar Ln", "Pine St", "Elm Blvd",
-        "Birch Rd", "Willow Way", "Aspen Ct", "Spruce Pl", "Juniper Dr",
-        "Magnolia Ln", "Cypress St", "Redwood Ave", "Hickory Blvd", "Walnut Ct",
-        "Dogwood Pl", "Chestnut Way", "Poplar Dr", "Sycamore Ln", "Laurel St",
+        "High Street", "Church Lane", "Mill Road", "Park Avenue", "Victoria Road",
+        "Kings Road", "Queens Drive", "Station Road", "Manor Way", "Elm Grove",
+        "Oakfield Road", "Priory Lane", "Castle Street", "Bridge Road", "Meadow Close",
+        "Willow Crescent", "Rosemary Gardens", "Thornton Place", "Chestnut Drive", "Bakers Row",
     ]
     cities_states = [
-        ("Austin", "TX", "787"),
-        ("Dallas", "TX", "752"),
-        ("Houston", "TX", "770"),
-        ("San Antonio", "TX", "782"),
+        ("London", "England", "SW1A"),
+        ("Manchester", "England", "M1"),
+        ("Birmingham", "England", "B1"),
+        ("Edinburgh", "Scotland", "EH1"),
+        ("Bristol", "England", "BS1"),
+        ("Liverpool", "England", "L1"),
     ]
     descriptions = [
-        "Beautiful home with open floor plan, updated kitchen with granite countertops, and spacious backyard.",
-        "Charming property featuring hardwood floors, large windows for natural light, and a two-car garage.",
-        "Modern home with smart features, energy-efficient appliances, and a stunning master suite.",
-        "Cozy residence with a fireplace, covered patio, and mature trees in a quiet neighborhood.",
-        "Spacious family home with a pool, game room, and recently renovated bathrooms.",
-        "Elegant home with vaulted ceilings, crown molding, and a gourmet kitchen with island.",
-        "Updated property with new roof, HVAC, and fresh paint throughout. Move-in ready!",
-        "Corner lot home with wrap-around porch, large yard, and a detached workshop.",
+        "Beautiful period home with open-plan living, updated kitchen with granite worktops, and spacious rear garden.",
+        "Charming Victorian property featuring original hardwood floors, bay windows, and a converted loft.",
+        "Modern home with smart features, energy-efficient appliances, and a stunning master bedroom with en-suite.",
+        "Cosy terraced house with a fireplace, conservatory, and mature garden in a quiet neighbourhood.",
+        "Spacious family home with a south-facing garden, utility room, and recently renovated bathrooms.",
+        "Elegant detached house with high ceilings, period features, and a bespoke kitchen with island.",
+        "Updated property with new roof, central heating, and fresh decor throughout. Chain-free and move-in ready!",
+        "End-of-terrace home with driveway parking, large garden, and a detached garage.",
     ]
 
     random.seed(42)
@@ -190,10 +192,10 @@ def generate_sample_data():
         beds = random.choice([2, 3, 3, 3, 4, 4, 4, 5])
         baths = random.choice([1, 2, 2, 2, 3, 3])
         sqft = random.randint(1000, 4500)
-        price = int(sqft * random.uniform(120, 350) / 1000) * 1000
+        price = int(sqft * random.uniform(150, 450) / 1000) * 1000
         street_num = random.randint(100, 9999)
         street = random.choice(streets)
-        zip_code = f"{zip_prefix}{random.randint(10, 99)}"
+        zip_code = f"{zip_prefix} {random.randint(1, 9)}{random.choice('ABCDEFGHJKLMNPRSTUVWXYZ')}{random.choice('ABCDEFGHJKLMNPRSTUVWXYZ')}"
 
         listings.append({
             "id": str(i + 1),

@@ -114,7 +114,7 @@
                 </div>
                 {% endif %}
                 <div class="listing-body">
-                    <div class="listing-price">${{ "{:,.0f}".format(p.price) }}</div>
+                    <div class="listing-price">£{{ "{:,.0f}".format(p.price) }}</div>
                     <div class="listing-addr">{{ p.address }}</div>
                     <div class="listing-loc">{{ p.city }}, {{ p.state }} {{ p.zip }}</div>
                     <div class="listing-meta">
