@@ -170,15 +170,17 @@ def call_llm(user_message):
             if "tool_use_failed" in str(e):
                 args = parse_failed_tool_call(e) or {}
                 args.setdefault("limit", 20)
-                properties = search_properties(**args)
+                all_results = search_properties(**args)
+                properties = all_results[:5]
                 summary_msg = (
-                    f"[Tool returned {len(properties)} properties: "
-                    f"{json.dumps([{k: r.get(k) for k in ('address','city','state','price','bedrooms','bathrooms','sqft')} for r in properties])}]"
+                    f"[Found {len(all_results)} total. Top results: "
+                    f"{json.dumps([{k: r.get(k) for k in ('id','address','city','state','price','bedrooms','bathrooms','sqft')} for r in properties])}]"
                 )
                 messages.append({"role": "assistant", "content": summary_msg})
-                messages.append({"role": "user", "content":
-                    "Present the top 5 properties. If there are more, tell the user how many more are available."
-                })
+                prompt = "Present these properties to the user."
+                if len(all_results) > 5:
+                    prompt += f" Mention there are {len(all_results) - 5} more available."
+                messages.append({"role": "user", "content": prompt})
                 response = call_groq(messages, MODELS[0])
                 reply_text = response.choices[0].message.content or (
                     "Here are some properties I found!" if properties else
@@ -187,7 +189,7 @@ def call_llm(user_message):
                 history.append({"role": "assistant", "content": f"{reply_text}\n\n[Search results: {summary_msg}]"})
                 session["messages"] = history
                 session.modified = True
-                return reply_text, properties[:5]
+                return reply_text, properties
             raise
 
         resp_msg = response.choices[0].message
@@ -215,19 +217,20 @@ def call_llm(user_message):
             for tc in resp_msg.tool_calls:
                 args = json.loads(tc.function.arguments)
                 args.setdefault("limit", 20)
-                results = search_properties(**args)
-                properties = results
+                all_results = search_properties(**args)
+                # Take top 5 for display — LLM and frontend see the same list
+                properties = all_results[:5]
 
                 slim = [
-                    {k: r.get(k) for k in ("address", "city", "state", "price", "bedrooms", "bathrooms", "sqft")}
-                    for r in results
+                    {k: r.get(k) for k in ("id", "address", "city", "state", "price", "bedrooms", "bathrooms", "sqft")}
+                    for r in properties
                 ]
                 tool_content = {
-                    "total_found": len(results),
-                    "showing": slim[:5],
+                    "total_found": len(all_results),
+                    "properties": slim,
                 }
-                if len(results) > 5:
-                    tool_content["note"] = f"There are {len(results) - 5} more matching properties available."
+                if len(all_results) > 5:
+                    tool_content["note"] = f"There are {len(all_results) - 5} more matching properties available."
 
                 tool_result = {
                     "role": "tool",
@@ -250,7 +253,7 @@ def call_llm(user_message):
     session["messages"] = history
     session.modified = True
 
-    return reply_text, properties[:5]
+    return reply_text, properties
 
 
 @app.route("/")

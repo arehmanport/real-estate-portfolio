@@ -30,6 +30,20 @@ def reload_data():
     return _load_data()
 
 
+def _safe_int(val):
+    try:
+        return int(val)
+    except (ValueError, TypeError):
+        return None
+
+
+def _safe_float(val):
+    try:
+        return float(val)
+    except (ValueError, TypeError):
+        return None
+
+
 def search_properties(
     min_price=None, max_price=None,
     min_bedrooms=None, max_bedrooms=None,
@@ -37,6 +51,8 @@ def search_properties(
     min_sqft=None,
     city=None, state=None, zip_code=None,
     limit=20,
+    sort_by="price",
+    sort_order="ascending",
     **_kwargs,
 ):
     """Search properties with optional filters. Returns top matches as list of dicts."""
@@ -46,26 +62,36 @@ def search_properties(
 
     mask = pd.Series(True, index=df.index)
 
-    if min_price is not None:
-        mask &= df["price"] >= float(min_price)
-    if max_price is not None:
-        mask &= df["price"] <= float(max_price)
-    if min_bedrooms is not None:
-        mask &= df["bedrooms"] >= int(min_bedrooms)
-    if max_bedrooms is not None:
-        mask &= df["bedrooms"] <= int(max_bedrooms)
-    if min_bathrooms is not None:
-        mask &= df["bathrooms"] >= float(min_bathrooms)
-    if min_sqft is not None:
-        mask &= df["sqft"] >= float(min_sqft)
-    if city is not None:
-        mask &= df["city"].str.lower() == city.lower()
-    if state is not None:
-        mask &= df["state"].str.upper() == state.upper()
-    if zip_code is not None:
-        mask &= df["zip"].astype(str) == str(zip_code)
+    v = _safe_float(min_price)
+    if v is not None:
+        mask &= df["price"] >= v
+    v = _safe_float(max_price)
+    if v is not None:
+        mask &= df["price"] <= v
+    v = _safe_int(min_bedrooms)
+    if v is not None:
+        mask &= df["bedrooms"] >= v
+    v = _safe_int(max_bedrooms)
+    if v is not None:
+        mask &= df["bedrooms"] <= v
+    v = _safe_float(min_bathrooms)
+    if v is not None:
+        mask &= df["bathrooms"] >= v
+    v = _safe_float(min_sqft)
+    if v is not None:
+        mask &= df["sqft"] >= v
+    if city and str(city).strip():
+        mask &= df["city"].str.lower() == str(city).lower().strip()
+    if state and str(state).strip():
+        mask &= df["state"].str.upper() == str(state).upper().strip()
+    if zip_code and str(zip_code).strip():
+        mask &= df["zip"].astype(str) == str(zip_code).strip()
 
-    results = df[mask].sort_values("price", ascending=True).head(int(limit))
+    ascending = str(sort_order).lower() != "descending"
+    sort_col = sort_by if sort_by in df.columns else "price"
+    lim = _safe_int(limit) or 20
+
+    results = df[mask].sort_values(sort_col, ascending=ascending).head(lim)
     return results.to_dict(orient="records")
 
 
@@ -108,19 +134,21 @@ SEARCH_TOOL_SCHEMA = {
     "name": "search_properties",
     "description": (
         "Search for real estate property listings with optional filters. "
-        "Returns up to 5 matching properties with price, address, bedrooms, "
-        "bathrooms, sqft, description, listing URL, and image URL."
+        "Returns matching properties with price, address, bedrooms, "
+        "bathrooms, sqft, description, and image URL. "
+        "Use sort_order='descending' for most expensive, largest, etc. "
+        "Use limit=1 when user asks for 'the most expensive' or 'the best' single property."
     ),
     "parameters": {
         "type": "object",
         "properties": {
             "min_price": {
                 "type": "number",
-                "description": "Minimum property price in dollars",
+                "description": "Minimum property price in GBP",
             },
             "max_price": {
                 "type": "number",
-                "description": "Maximum property price in dollars",
+                "description": "Maximum property price in GBP",
             },
             "min_bedrooms": {
                 "type": "integer",
@@ -144,15 +172,23 @@ SEARCH_TOOL_SCHEMA = {
             },
             "state": {
                 "type": "string",
-                "description": "State abbreviation (e.g. TX, CA)",
+                "description": "Region/country (e.g. England, Scotland)",
             },
             "zip_code": {
                 "type": "string",
-                "description": "ZIP code to filter by",
+                "description": "Postcode to filter by",
             },
             "limit": {
                 "type": "integer",
-                "description": "Maximum number of results to return (default 5)",
+                "description": "Number of results to return (use 1 for single best match, default 5)",
+            },
+            "sort_by": {
+                "type": "string",
+                "description": "Column to sort by: price, bedrooms, bathrooms, sqft (default: price)",
+            },
+            "sort_order": {
+                "type": "string",
+                "description": "Sort direction: ascending or descending (default: ascending). Use descending for most expensive, most bedrooms, etc.",
             },
         },
     },
